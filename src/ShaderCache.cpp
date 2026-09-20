@@ -3180,9 +3180,9 @@ namespace SIE
 		if (!conditionVariable.wait(
 				lock, stoken,
 				[this, &shaderCache]() { return !availableTasks.empty() &&
-			                                    // Dispatch when pool has room. Use < (not <=) so that after
-			                                    // push_task() the total never exceeds the limit.
-			                                    (int)shaderCache->compilationPool.get_tasks_total() <
+			                                    // Complete() erases this entry before notifying. The pool's count
+			                                    // only drops after the callback returns, without notifying us.
+			                                    static_cast<int>(tasksInProgress.size()) <
 			                                        (!shaderCache->backgroundCompilation ? shaderCache->compilationThreadCount : shaderCache->backgroundCompilationThreadCount); })) {
 			/*Woke up because of a stop request. */
 			return std::nullopt;
