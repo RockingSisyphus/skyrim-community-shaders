@@ -2410,6 +2410,16 @@ namespace SIE
 		isSkipUnchangedShaders = value;
 	}
 
+	void ShaderCache::SetBackgroundCompilation(bool value)
+	{
+		{
+			// Serialize with WaitTake's predicate check and transition into wait.
+			std::scoped_lock lock{ compilationSet.compilationMutex };
+			backgroundCompilation = value;
+		}
+		compilationSet.conditionVariable.notify_one();
+	}
+
 	void ShaderCache::DeleteDiskCache()
 	{
 		std::scoped_lock lock{ compilationSet.compilationMutex };
